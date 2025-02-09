@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts Demo</title>
+    <!-- 引入 ECharts 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <!-- 引入 jQuery 库 -->
+    <script src="./js/jquery-3.6.0.js"></script>
+    <!-- 引入日期选择器库 -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="css/home.css">
+
+    <style>
+        /* 设置容器的宽度和高度 */
+        #chart-container {
+            width: 900px;
+            margin-top: 20px;
+            height: 780px;
+            /*margin: 0 auto;*/
+        }
+
+        #line-chart-container {
+            width: 600px;
+            height: 260px;
+            background-color: #eeee;
+            border-radius: 10px;
+            padding-left: 40px;
+            padding-top: 10px;
+            padding-bottom: -10px !important;
+            position: absolute;
+            display: none;
+        }
+
+        /* 添加筛选器样式 */
+        .filter-container {
+            margin-bottom: 20px;
+        }
+        /* 日期选择器样式 */
+        #date-range {
+            padding: 8px 12px; /* 内边距 */
+            border: 1px solid #cccccc; /* 边框样式 */
+            border-radius: 4px; /* 圆角 */
+            background-color: #ffffff; /* 背景颜色 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+            font-size: 16px; /* 字体大小 */
+            color: #333333; /* 字体颜色 */
+        }
+
+        /* 当输入框获得焦点时的样式 */
+        #date-range:focus {
+            border-color: #4a90e2; /* 焦点时边框颜色 */
+            outline: none; /* 移除默认轮廓 */
+        }
+
+        /* 筛选和清空按钮样式 */
+        #filter-button, #clear-button {
+            padding: 8px 16px;
+            margin-left: 8px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4a90e2;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #filter-button:hover, #clear-button:hover {
+            background-color: #357abd;
+        }
+    </style>
+</head>
+<body>
+<div>
+<!--    <div class="filter-container">-->
+<!--        <input style="width: 155px;" type="date" id="date-range" placeholder="Select date" min="2023-07-05" max="2023-12-18">-->
+<!--        <button id="filter-button">Submit</button>-->
+<!--        <button id="clear-button">Reset</button>-->
+<!--    </div>-->
+
+    <div style="display: flex;justify-content: space-between">
+        <div id="chart-container"></div>
+<!--        <div class="home-left-cont" style="box-shadow:none;margin-top: -20px;width: 610px;">-->
+<!--            <div class="card messageCard">-->
+<!--                <h1 class="card-fontSize">How to use this system</h1>-->
+<!--                <ul style="color: #494e52;margin-top: -30px;">-->
+<!--&lt;!&ndash;                    <li>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <p>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <strong>Data Characteristics:</strong><br>&ndash;&gt;-->
+<!--&lt;!&ndash;                            1. Scroll up or down to zoom in or out of the map.<br>&ndash;&gt;-->
+<!--&lt;!&ndash;                            2. Drag the map to center and maximize the display of the relevant prefecture.<br>&ndash;&gt;-->
+<!--&lt;!&ndash;                            3. Detailed spatial distribution of radiation monitoring stations.<br>&ndash;&gt;-->
+<!--&lt;!&ndash;                        </p>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </li>&ndash;&gt;-->
+<!--                    <li>-->
+<!--                        <p>-->
+<!--                            <strong>Predictive Visualization</strong><br>-->
+<!--                            1. Click <b> Select Date</b> to start forecasting.-->
+<!--                            <i>(can only select times between July 5, 2023, and December 18, 2023.)</i><br>-->
+<!--                            2. Select the radiation monitoring station you wish to view for prediction.<br>-->
+<!--                            2. Drag the prediction box to the desired position for viewing. <br>-->
+<!--                            3. Click on the empty space to dismiss the display of the prediction box. <br>-->
+
+<!--                        </p>-->
+<!--                    </li>-->
+<!--&lt;!&ndash;                    <li>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <p>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <strong>Notes:</strong><br>&ndash;&gt;-->
+<!--&lt;!&ndash;                            1. All forecast data are for 2023. The year is omitted for convenience.<br>&ndash;&gt;-->
+<!--&lt;!&ndash;                        </p>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </li>&ndash;&gt;-->
+<!--                </ul>-->
+<!--            </div>-->
+<!--        </div>-->
+    </div>
+    <div id="line-chart-container" style=""></div>
+</div>
+
+<!-- 引入 JavaScript 代码 -->
+<script src="js/map_node_forecasting.js"></script>
+<script>
+// // 初始化日期选择器
+    // flatpickr("#date-range", {
+    //     enableTime: true, // 如果需要选择具体时间
+    //     dateFormat: "Y-m-d", // 或者 "Y-m-d H:i" 如果启用了时间
+    //     mode: "single" // 设置为单日模式
+    // });
+
+    // 清空按钮逻辑
+    document.getElementById('clear-button').addEventListener('click', function () {
+        document.getElementById('date-range').value = '';
+        document.getElementById('num-items').value = '';
+    });
+
+</script>
+</body>
+</html>

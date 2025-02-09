@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Heatmap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入必要的脚本 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@latest"></script>
+    <style>
+        html, body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        /* 直接定位下拉框 */
+        #csvSelector {
+            position: fixed;  /* 固定定位 */
+            top: 60px;        /* 距离顶部 10 像素，可根据需要调整 */
+            right: 20px;      /* 距离右侧 10 像素，可根据需要调整 */
+            z-index: 1000;    /* 确保下拉框在其他元素之上 */
+            height: 20px;     /* 设置下拉框高度 */
+        }
+        /* 热力图容器样式 */
+        #heatmapChart {
+            width: 100%;
+            top: 10px;
+            left: -50px;
+            height: 140vh;    /* 使热力图充满整个视口高度 */
+        }
+    </style>
+</head>
+<body>
+
+<!-- 直接使用下拉框，无需额外的容器 -->
+<select id="csvSelector">
+    <option value="json/data_calendar_heatmap/all_japan_heatmap_90.66_111.17.csv">Entire Japan</option>
+    <option value="json/data_calendar_heatmap/三重県_heatmap_11.11_74.07.csv">三重県</option>
+    <option value="json/data_calendar_heatmap/京都府_heatmap_32.83_57.57.csv">京都府</option>
+    <option value="json/data_calendar_heatmap/佐賀県_heatmap_49.01_77.83.csv">佐賀県</option>
+    <option value="json/data_calendar_heatmap/兵庫県_heatmap_0.0_84.38.csv">兵庫県</option>
+    <option value="json/data_calendar_heatmap/北海道_heatmap_17.83_48.5.csv">北海道</option>
+    <option value="json/data_calendar_heatmap/千葉県_heatmap_37.02_55.96.csv">千葉県</option>
+    <option value="json/data_calendar_heatmap/和歌山県_heatmap_37.84_60.35.csv">和歌山県</option>
+    <option value="json/data_calendar_heatmap/埼玉県_heatmap_40.47_54.39.csv">埼玉県</option>
+    <option value="json/data_calendar_heatmap/大分県_heatmap_35.07_54.57.csv">大分県</option>
+    <option value="json/data_calendar_heatmap/大阪府_heatmap_30.94_56.97.csv">大阪府</option>
+    <option value="json/data_calendar_heatmap/奈良県_heatmap_39.61_65.91.csv">奈良県</option>
+    <option value="json/data_calendar_heatmap/宮城県_heatmap_33.33_50.77.csv">宮城県</option>
+    <option value="json/data_calendar_heatmap/宮崎県_heatmap_30.66_55.36.csv">宮崎県</option>
+    <option value="json/data_calendar_heatmap/富山県_heatmap_34.24_80.05.csv">富山県</option>
+    <option value="json/data_calendar_heatmap/山口県_heatmap_28.42_75.46.csv">山口県</option>
+    <option value="json/data_calendar_heatmap/山形県_heatmap_12.17_49.95.csv">山形県</option>
+    <option value="json/data_calendar_heatmap/山梨県_heatmap_20.97_41.76.csv">山梨県</option>
+    <option value="json/data_calendar_heatmap/岐阜県_heatmap_27.2_83.15.csv">岐阜県</option>
+    <option value="json/data_calendar_heatmap/岡山県_heatmap_41.46_71.85.csv">岡山県</option>
+    <option value="json/data_calendar_heatmap/岩手県_heatmap_21.74_44.42.csv">岩手県</option>
+    <option value="json/data_calendar_heatmap/島根県_heatmap_9.91_66.21.csv">島根県</option>
+    <option value="json/data_calendar_heatmap/広島県_heatmap_0.0_76.58.csv">広島県</option>
+    <option value="json/data_calendar_heatmap/徳島県_heatmap_9.86_57.59.csv">徳島県</option>
+    <option value="json/data_calendar_heatmap/愛媛県_heatmap_19.64_66.69.csv">愛媛県</option>
+    <option value="json/data_calendar_heatmap/愛知県_heatmap_41.39_67.75.csv">愛知県</option>
+    <option value="json/data_calendar_heatmap/新潟県_heatmap_23.48_77.28.csv">新潟県</option>
+    <option value="json/data_calendar_heatmap/東京都_heatmap_0.0_44.51.csv">東京都</option>
+    <option value="json/data_calendar_heatmap/栃木県_heatmap_24.25_57.08.csv">栃木県</option>
+    <option value="json/data_calendar_heatmap/沖縄県_heatmap_7.24_224.55.csv">沖縄県</option>
+    <option value="json/data_calendar_heatmap/滋賀県_heatmap_38.2_61.01.csv">滋賀県</option>
+    <option value="json/data_calendar_heatmap/熊本県_heatmap_0.0_53.43.csv">熊本県</option>
+    <option value="json/data_calendar_heatmap/石川県_heatmap_32.88_61.32.csv">石川県</option>
+    <option value="json/data_calendar_heatmap/神奈川県_heatmap_17.55_37.84.csv">神奈川県</option>
+    <option value="json/data_calendar_heatmap/福井県_heatmap_34.47_65.66.csv">福井県</option>
+    <option value="json/data_calendar_heatmap/福岡県_heatmap_0.0_66.38.csv">福岡県</option>
+    <option value="json/data_calendar_heatmap/福島県_heatmap_95.55_122.92.csv">福島県</option>
+    <option value="json/data_calendar_heatmap/秋田県_heatmap_0.0_53.11.csv">秋田県</option>
+    <option value="json/data_calendar_heatmap/群馬県_heatmap_21.02_41.51.csv">群馬県</option>
+    <option value="json/data_calendar_heatmap/茨城県_heatmap_40.63_53.33.csv">茨城県</option>
+    <option value="json/data_calendar_heatmap/長崎県_heatmap_22.44_53.95.csv">長崎県</option>
+    <option value="json/data_calendar_heatmap/長野県_heatmap_40.55_62.98.csv">長野県</option>
+    <option value="json/data_calendar_heatmap/青森県_heatmap_17.04_44.39.csv">青森県</option>
+    <option value="json/data_calendar_heatmap/静岡県_heatmap_37.26_52.6.csv">静岡県</option>
+    <option value="json/data_calendar_heatmap/香川県_heatmap_32.4_65.68.csv">香川県</option>
+    <option value="json/data_calendar_heatmap/高知県_heatmap_26.11_48.92.csv">高知県</option>
+    <option value="json/data_calendar_heatmap/鳥取県_heatmap_34.62_101.93.csv">鳥取県</option>
+    <option value="json/data_calendar_heatmap/鹿児島県_heatmap_47.38_72.33.csv">鹿児島県</option>
+</select>
+
+<!-- 热力图容器 -->
+<div id="heatmapChart"></div>
+
+<!-- 引入您的自定义脚本 -->
+<script src="js/data_calendar_heatmap_js.js"></script>
+</body>
+</html>
