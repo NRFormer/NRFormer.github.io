@@ -48,7 +48,7 @@ function run(_rawData, selectedCountries) {
             showSymbol: false,
             name: area,
             lineStyle: {
-                width: 1.5 // 线条粗细
+                width: 1 // 线条粗细
             },
             endLabel: {
                 show: true,
