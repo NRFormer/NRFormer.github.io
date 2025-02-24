@@ -3,7 +3,7 @@ var myChart = echarts.init(chartDom);
 var rawData; // 存储原始数据
 
 // 从服务器获取数据
-$.get('json/data_LineChart_sensor_pattern/3D-data-210317-241211_line_pattern_data.json', function (_rawData) {
+$.get('json/data_LineChart_sensor_pattern/1D-data_line_pattern_data.json', function (_rawData) {
     rawData = _rawData; // 保存原始数据
     updateChart(); // 初始图表渲染
 });
@@ -36,7 +36,8 @@ function run(_rawData, selectedCountries) {
                 config: {
                     and: [
                         { dimension: 'time', gte: 2021 },
-                        { dimension: 'area', '=': area }
+                        { dimension: 'area', '=': area },
+                        // { dimension: 'value', '!=': 0 } // 过滤掉值为0的数据
                     ]
                 }
             }
@@ -46,6 +47,9 @@ function run(_rawData, selectedCountries) {
             datasetId: datasetId,
             showSymbol: false,
             name: area,
+            lineStyle: {
+                width: 1.5 // 线条粗细
+            },
             endLabel: {
                 show: true,
                 formatter: function (params) {
@@ -79,11 +83,18 @@ function run(_rawData, selectedCountries) {
         ],
         title: {
             text: 'Radiation Patterns Across Different Prefectures',
-            left: 'center'
+            subtext: 'Average radiation values across all monitoring stations within each prefecture',
+
+            left: 'center',
+            textStyle: {
+                fontSize: 22,
+                fontWeight: "bold",
+                color: "#464646"
+            },
         },
         tooltip: {
             order: 'valueDesc',
-            trigger: 'axis'
+            trigger: 'axis',
         },
         xAxis: {
             type: 'category',
@@ -92,13 +103,15 @@ function run(_rawData, selectedCountries) {
         yAxis: {
             name: 'Radiation',
             left: 1400,
-            min: 0.01
+            min: 15
         },
         grid: {
-            right: 140
+            left: '7%',
+            right: '12%',
+            containLabel: true
         },
         series: seriesList
     };
 
-    myChart.setOption(option, true); // 使用 true 参数来确保图表正确更新
+    myChart.setOption(option, true); // 确保图表正确更新
 }

@@ -19,10 +19,23 @@ $.get('json/japan.geojson', function (geoJson) {
     echarts.registerMap('Japan', geoJson);
 
     // 加载节点数据
-    $.get('json/map_node_forecasting/NRFormer_1D-data-v2-3841_test_Sample1_PreGraph_xlx.json', function (nodeData) {
+    $.get('json/map_node_forecasting/1D-data_sensor_forcasting.json', function (nodeData) {
         originalNodeData = nodeData; // 保存原始节点数据
 
-        myChart.setOption(getMapOption(nodeData));
+        // 对每个节点数据进行处理，设置颜色和状态
+        const processedNodeData = nodeData.map(node => {
+            const value = node.pre; // 获取节点的值
+            const isAbnormal = value.some(value => value > 1000);
+            return {
+                ...node,
+                itemStyle: {
+                    color: isAbnormal ? '#FF1517' : '#3960FF', // 设置颜色为红色或蓝色
+                },
+            };
+        });
+
+        // 默认设置 zoom 和 center
+        myChart.setOption(getMapOption(processedNodeData, 2, [139, 38]));
 
         // 当点击地图节点时的处理逻辑
         myChart.on('click', function (event) {
@@ -54,37 +67,84 @@ myChart.on('geoRoam', function () {
 });
 
 function getMapOption(nodeData, zoom, center) {
+    const greaterThanData = nodeData.filter(item => item.pre.some(value => value > 1000));
+    const lessThanOrEqualData = nodeData.filter(item => item.pre.some(value => value <= 1000));
+
     return {
         title: {
-            text: 'Radiation Forecasting of each Monitoring Station.',
+            text: 'Real-time Radiation Forecasting System',
             left: 'center'
         },
         textStyle: {
-            color:'#4a4e52',
-            fontFamily: 'Georgia, JiZiJingDianDaBiaoSongJianFan, FangSong, STFangsong, sans-serif' // 设置主标题整体字体
+            color: '#4a4e52',
+            fontFamily: 'Georgia, JiZiJingDianDaBiaoSongJianFan, FangSong, STFangsong, sans-serif'
         },
         legend: {
+            data: ['Elevated RadNodes', 'Low RadNodes'],
+            show: true,
+            textStyle: {
+                fontSize: 15,
+                fontWeight: "bold",
+                color: "#464646"
+            },
+            left: 'left',
+            top: 30,
+            padding: [20, 0, 0, 0],
             orient: 'horizontal',
-            top: 20,
         },
         geo: {
             map: 'Japan',
             roam: true,
-            zoom: zoom || 2,
-            center: center || [139, 38]
+            zoom: zoom,
+            center: center,
+            label: {
+                show: false
+            }
         },
         series: [
             {
-                // name: '节点',
+                name: 'Elevated RadNodes',
                 type: 'scatter',
                 coordinateSystem: 'geo',
-                data: nodeData,
-                symbolSize: 6
+                data: greaterThanData,
+                symbolSize: 6,
+                zIndex: 99999,
+                zlevel: 10,
+                label: {
+                    formatter: '{b}',
+                    position: 'right',
+                    show: false
+                },
+                itemStyle: {
+                    color: '#FF1517',
+                    shadowBlur: 0,
+                    shadowColor: '#333'
+                }
+            },
+            {
+                name: 'Low RadNodes',
+                type: 'scatter',
+                coordinateSystem: 'geo',
+                data: lessThanOrEqualData,
+                symbolSize: 6,
+                zIndex: 1,
+                zlevel: 5,
+                label: {
+                    formatter: '{b}',
+                    position: 'right',
+                    show: false
+                },
+                itemStyle: {
+                    color: '#3960FF',
+                    shadowBlur: 0,
+                    shadowColor: '#333'
+                }
             }
         ]
     };
 }
 
+// 更新折线图的数据显示
 function updateLineChart(data) {
     lineChart.setOption({
         tooltip: {
@@ -105,6 +165,17 @@ function updateLineChart(data) {
         },
         title: {
             text: data.name,
+            subtext: '0.001μSv/h',
+            textStyle: {
+                fontSize: 16,
+                fontWeight: 'normal',
+                color: '#333'
+            },
+            subtextStyle: {
+                fontSize: 14,
+                color: '#333',
+                fontWeight: 'normal'
+            }
         },
         xAxis: {
             type: 'category',
@@ -137,11 +208,11 @@ function updateLineChart(data) {
     lineChartContainer.style.display = 'block';
 }
 
+// 更新折线图位置
 function updateLineChartPosition(x, y) {
-    // 更新折线图的位置
     var chartPosition = container.getBoundingClientRect();
-    var offsetX = 20; // 横向偏移量
-    var offsetY = 20; // 纵向偏移量
+    var offsetX = 20;
+    var offsetY = 20;
 
     lineChartContainer.style.left = chartPosition.left + x + offsetX + 'px';
     lineChartContainer.style.top = chartPosition.top + y + offsetY + 'px';
@@ -178,7 +249,6 @@ function makeDraggable(element) {
 makeDraggable(lineChartContainer);
 
 function applyFilter(data) {
-    // 直接更新折线图，无需依赖时间选择
     const filteredData = {
         time: convertAllDates(data.time),
         pre: data.pre,
@@ -187,6 +257,7 @@ function applyFilter(data) {
     updateLineChart(filteredData);
 }
 
+// ================= 修改的日期处理部分 =================
 // 日期格式转换
 function convertAllDates(dateArray) {
     return dateArray.map(convertDateFormat);
@@ -194,5 +265,9 @@ function convertAllDates(dateArray) {
 
 function convertDateFormat(dateStr) {
     const dateObject = new Date(dateStr);
-    return (dateObject.getMonth() + 1) + '-' + dateObject.getDate();
+    const year = dateObject.getFullYear();
+    const month = String(dateObject.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObject.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
+// ================= 修改结束 =================

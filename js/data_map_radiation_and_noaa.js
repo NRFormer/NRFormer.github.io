@@ -73,7 +73,7 @@ $.get('json/japan.geojson', function (geoJson) {
                 data: ['Meteorological Monitoring Station', 'Radiation Monitoring Station'],
                 show: true,
                 textStyle: {
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: "bold",
                     color: "#464646"
                 },
@@ -83,6 +83,8 @@ $.get('json/japan.geojson', function (geoJson) {
             },
             geo: {
                 map: 'Japan',
+                zoom: 2,  // 默认缩放比例
+                center: [139, 37.5],  // 默认中心点
                 roam: true,
                 label: {
                     show: false // 控制地图板块 name isShow

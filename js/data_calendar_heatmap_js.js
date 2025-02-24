@@ -41,23 +41,22 @@ function processData(csvData, csvFileName) {
 
     generateHeatmap(result, csvFileName);
 }
-
 // 生成热力图
 function generateHeatmap(data, csvFileName) {
     var months = [...new Set(data.map(item => item[0]))]; // 月份
     var days = [...new Set(data.map(item => item[1]))]; // 天
     days.sort(function (a, b) {
         return a - b;
-    }); // 天数排序
+    });
 
     var heatmapData = data.map(item => [months.indexOf(item[0]), days.indexOf(item[1]), item[2]]);
 
+    // 计算除了0以外的最小值
+    var nonZeroValues = data.map(item => parseFloat(item[2])).filter(value => value !== 0);
+    var minValue = nonZeroValues.length ? Math.min(...nonZeroValues) : 0;
+    var maxValue = Math.max(...data.map(item => parseFloat(item[2])));
+
     var option = {
-        // title: {
-        //     top: 0,
-        //     left: 'center',
-        //     text: 'Average Values Heatmap - ' + csvFileName.split('/').pop()
-        // },
         tooltip: {
             position: 'top',
             formatter: function (params) {
@@ -85,12 +84,12 @@ function generateHeatmap(data, csvFileName) {
             }
         },
         visualMap: {
-            min: Math.min(...data.map(item => parseFloat(item[2]))),
-            max: Math.max(...data.map(item => parseFloat(item[2]))),
+            min: minValue,  // 修改后的最小值（排除0）
+            max: maxValue,
             calculable: true,
-            orient: 'vertical', // 设置为竖直排放
-            left: 'right', // 水平位置靠右
-            bottom: 200, // 调整距离底部的位置
+            orient: 'vertical',
+            left: 'right',
+            bottom: 200,
             color: ['#d94e5d', '#eac736', '#50a3ba']
         },
         series: [{
@@ -99,7 +98,7 @@ function generateHeatmap(data, csvFileName) {
             data: heatmapData,
             label: {
                 normal: {
-                    show: false // 不显示每个单元格的值
+                    show: false
                 }
             },
             itemStyle: {
@@ -108,13 +107,13 @@ function generateHeatmap(data, csvFileName) {
                     shadowColor: 'rgba(0, 0, 0, 0.5)'
                 }
             },
-            rectangular: false, // 将模块变成正方形
-            width: '1', // 正方形的宽度
-            height: '2' // 正方形的高度
+            rectangular: false,
+            width: '1',
+            height: '2'
         }]
     };
-
 
     var heatmapChart = echarts.init(document.getElementById('heatmapChart'));
     heatmapChart.setOption(option);
 }
+

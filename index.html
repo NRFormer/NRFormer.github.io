@@ -10,8 +10,8 @@
 <body>
 <nav class="navbar">
     <div class="navbar-container">
-        <a href="/" class="nav-logo">NRFormer - Web-based Real-time Radiation Forecasting System</a>
-        <div class="nav-links" style="margin-right: -15px;">
+        <a class="nav-logo" href="index.html">NRFormer - Web-based Real-time Radiation Forecasting System</a>
+        <div class="nav-links">
             <a class="href-a" href="index.html"><b>Forecasting System</b></a>
             <a class="href-a" href="index_data_analysis.html"><b>Data Analysis</b></a>
         </div>
@@ -22,7 +22,11 @@
     <div class="home-con item-bottom-">
         <div class="home-left">
             <div class="home-left-cont">
-                <iframe class="all-echarts-item" src="map_node_forecasting.html"></iframe>
+                <div class="positionSpan">
+                    <p>1. Click node types above to toggle visibility.</p>
+                    <p>2. Scroll to zoom and Click stations for forecast details.</p>
+                </div>
+                <iframe class="all-echarts-item positionMap" src="map_node_forecasting.html"></iframe>
             </div>
         </div>
         <div class="home-left left-cont-dis" style="margin-top: -40px;">
@@ -69,8 +73,21 @@
 </div>
 <div class="footer">
     <strong>&copy; Web-based Real-time Radiation Forecasting System</strong><br><br>
-    <strong>NRFormer: Nationwide Nuclear Radiation Forecasting with Spatio-Temporal Transformer<strong>
+    <strong>NRFormer: Nationwide Nuclear Radiation Forecasting with Spatio-Temporal Transformer</strong>
 </div>
 </body>
 </html>
-
+<style>
+    .positionMap{
+        position: relative;
+    }
+    .positionSpan{
+        position: absolute;
+        font-weight: 500;
+        top: 220px;
+        width: 400px;
+        color: #858a8e;
+        font-family: Georgia, JiZiJingDianDaBiaoSongJianFan, FangSong, STFangsong, sans-serif;
+        font-style: italic;
+    }
+</style>

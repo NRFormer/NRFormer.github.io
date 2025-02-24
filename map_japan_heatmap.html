@@ -3,9 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>NRFormer Demo</title>
-  <!-- 引入 ECharts 库 -->
   <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
-  <!-- 引入 jQuery 库 -->
   <script src="./js/jquery-3.6.0.js"></script>
   <style>
     #chart-container {
@@ -14,7 +12,7 @@
       margin: 0 auto;
     }
 
-    .time-down{
+    .time-down {
       display: flex;
       width: 150px;
       flex-direction: column;
@@ -23,44 +21,78 @@
       color: #2980B9;
       text-align: center;
       position: relative;
-      background: linear-gradient(to right, rgb(178 220 247 / 40%), rgb(178 247 217 / 40%)),rgb(247 228 178 / 40%);
+      background: linear-gradient(to right, rgb(178 220 247 / 40%), rgb(178 247 217 / 40%)), rgb(247 228 178 / 40%);
       top: 250px;
       left: 50px;
     }
 
-    #timeDomData{
+    #controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
 
+    #playPauseBtn, #prevDayBtn, #nextDayBtn {
+      padding: 8px 15px;
+      background-color: #2980B9;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    #progressBar {
+      width: 300px;
     }
   </style>
 </head>
 <body>
+
 <div class="content-all">
   <div class="time-down">
-    <div>
-      <strong>Date:</strong>
-    </div>
-    <div id="timeDomData">
-
-    </div>
+    <div><strong>Date:</strong></div>
+    <div id="timeDomData"></div>
   </div>
   <div id="chart-container" style="margin-top: -40px;"></div>
+
+  <!-- 控制按钮 -->
+  <div id="controls">
+    <button id="prevDayBtn">← Previous Day</button>
+    <button id="playPauseBtn">Pause</button>
+    <button id="nextDayBtn">Next Day →</button>
+    <input type="range" id="progressBar" min="0" step="1">
+  </div>
 </div>
 
 <script>
-  // 获取容器元素
   var container = document.getElementById('chart-container');
-  // 初始化 ECharts 实例
   var myChart = echarts.init(container);
+  var timeDom = document.getElementById("timeDomData");
+  var playPauseBtn = document.getElementById("playPauseBtn");
+  var prevDayBtn = document.getElementById("prevDayBtn");
+  var nextDayBtn = document.getElementById("nextDayBtn");
+  var progressBar = document.getElementById("progressBar");
 
-  // 显示加载动画
-  // myChart.showLoading();
+  // **起止时间**
+  var startDate = new Date('2024-01-01');
+  var endDate = new Date();
+  endDate.setDate(endDate.getDate() - 1); // 结束时间设为昨天
 
-  // 定义 visualMap 的默认配置
+  var currentDate = new Date(startDate); // 当前播放的日期
+  var isPlaying = true;
+  var interval = null;
+
+  // **计算进度条范围**
+  var totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
+  progressBar.min = 0;
+  progressBar.max = totalDays;
+  progressBar.value = 0; // 默认从第一天开始
+
   var visualMapConfig = {
-    min: 20,
-    max: 60,
-    // range: [4, 15],
-    // calculable: true,
+    min: 0,
+    max: 100,
     splitNumber: 5,
     orient: 'vertical',
     right: 0,
@@ -73,103 +105,106 @@
     }
   };
 
-  // 定义起始和结束日期
-  var startDate = new Date('2021-04-10');
-  var endDate = new Date('2023-12-19');
-
-  // 初始化当前日期
-  var currentDate = startDate;
-
-  // 加载地图数据
   $.get('json/japan.geojson', function (geoJson) {
-    // 注册地图
     echarts.registerMap('Japan', geoJson);
 
-    function switchFile() {
-      let TimeDom = document.getElementById("timeDomData");
+    function loadDataAndRender() {
       var folderPath = 'json/map_japan_heatmap/';
       var currentFileName = currentDate.toISOString().split('T')[0] + '.json';
       var titleName = currentDate.toISOString().split('T')[0];
-      TimeDom.innerText = titleName
 
+      timeDom.innerText = titleName;
       myChart.setOption({
-        title: {
-          text: 'Daily Radiation Forecasting Heatmap of Japan.',
-          left: 'center',
-          font: 'Times',
-        },
-        // 设置 legend 位置为 'bottom'，对齐方式为 'right'
-        legend: {
-          orient: 'horizontal',
-          left: 'center',
-        },
+        title: { text: 'Daily Radiation Forecasting Heatmap of Japan.', left: 'center' },
+        legend: { orient: 'horizontal', left: 'center' },
         textStyle: {
-          color:'#4a4e52',
-          fontFamily: 'Georgia, JiZiJingDianDaBiaoSongJianFan, FangSong, STFangsong, sans-serif' // 设置主标题整体字体
-        }
+            color: '#4a4e52',
+            fontFamily: 'Georgia, JiZiJingDianDaBiaoSongJianFan, FangSong, STFangsong, sans-serif' // 设置主标题整体字体
+        },
       });
 
-      // 加载节点数据
       $.get(folderPath + currentFileName, function (nodeData) {
-        console.log(nodeData[898]);
-        // 设置图表的配置项和数据
         myChart.setOption({
-          geo: {
-            map: 'Japan',
-            roam: false,
-            zoom:2,
-            center: [139, 39],
-          },
-          series: [
-            {
-              // name: '热力',
-              type: 'heatmap',
-              coordinateSystem: 'geo',
-              data: nodeData.map(function (item) {
-                // 转换成热力图需要的数据格式
-                // 假设数据格式为 {lng: 经度, lat: 纬度, value: 权重}
-                return [item.lng, item.lat, item.value];
-              }),
-              pointSize: 5, // 热力点的大小
-              blurSize: 10, // 热力点的模糊大小
-              width: '100%', // 设置模块宽度为100%使其成为正方形
-              height: '100%' // 设置模块高度为100%使其成为正方形
-            }
-          ],
-          visualMap: visualMapConfig // 使用定义的 visualMap 配置
+          geo: { map: 'Japan', roam: false, zoom: 2, center: [139, 38] },
+          series: [{
+            type: 'heatmap',
+            coordinateSystem: 'geo',
+            data: nodeData.map(item => [item.lng, item.lat, item.value]),
+            pointSize: 5,
+            blurSize: 10,
+            width: '100%',
+            height: '100%'
+          }],
+          visualMap: visualMapConfig
         });
-
-        // 增加一天
-        currentDate.setDate(currentDate.getDate() + 1);
-
-        // 如果日期小于等于结束日期，则设置定时器，三秒后渲染下一个文件
-        if (currentDate <= endDate) {
-          setTimeout(switchFile, 300); // 三秒后渲染下一个文件
-        }
       });
     }
 
-    // 开始展示第一个文件
-    switchFile();
+    function playNextFrame() {
+      if (!isPlaying) return;
 
-    // 添加地图缩放和平移事件监听器
-    myChart.on('geoRoam', function (params) {
-      // 获取地图的缩放级别和平移位置
-      var zoom = params.zoom;
-      var x = params.x;
-      var y = params.y;
+      loadDataAndRender();
 
-      // 在这里处理地图缩放和平移事件
-      // 更新数据并重新渲染，保持数据附着在地图上
-      // 您需要根据地图的缩放级别和平移位置来调整数据的缩放和平移
-      console.log('Zoom Level: ' + zoom);
-      console.log('X Coordinate: ' + x);
-      console.log('Y Coordinate: ' + y);
+      // **前进一天**
+      currentDate.setDate(currentDate.getDate() + 1);
+      progressBar.value = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
 
-      // 更新数据并重新渲染
-      // 您需要根据缩放级别和平移位置来更新数据
-      // 更新完数据后，调用 myChart.setOption 更新图表
+      // **循环播放**
+      if (currentDate > endDate) {
+        currentDate = new Date(startDate);
+        progressBar.value = 0;
+      }
+
+      interval = setTimeout(playNextFrame, 50);
+    }
+
+    // **初始化播放**
+    playNextFrame();
+
+    // **播放/暂停按钮**
+    playPauseBtn.addEventListener("click", function () {
+      if (isPlaying) {
+        isPlaying = false;
+        clearTimeout(interval);
+        playPauseBtn.innerText = "Play";
+      } else {
+        isPlaying = true;
+        playNextFrame();
+        playPauseBtn.innerText = "Pause";
+      }
     });
+
+    // **进度条滑动事件**
+    progressBar.addEventListener("input", function () {
+      clearTimeout(interval);
+      isPlaying = false;
+      playPauseBtn.innerText = "Play";
+
+      // **计算新日期**
+      currentDate = new Date(startDate.getTime());
+      currentDate.setDate(startDate.getDate() + parseInt(progressBar.value));
+
+      loadDataAndRender(); // 立即加载数据
+    });
+
+    // **前一天按钮**
+    prevDayBtn.addEventListener("click", function () {
+      if (currentDate > startDate) {
+        currentDate.setDate(currentDate.getDate() - 1);
+        progressBar.value = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
+        loadDataAndRender();
+      }
+    });
+
+    // **后一天按钮**
+    nextDayBtn.addEventListener("click", function () {
+      if (currentDate < endDate) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        progressBar.value = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
+        loadDataAndRender();
+      }
+    });
+
   });
 
 </script>
