@@ -78,7 +78,7 @@
   // **起止时间**
   var startDate = new Date('2024-01-01');
   var endDate = new Date();
-  endDate.setDate(endDate.getDate() - 1); // 结束时间设为昨天
+  endDate.setDate(endDate.getDate()); // 结束时间设为昨天
 
   var currentDate = new Date(startDate); // 当前播放的日期
   var isPlaying = true;
