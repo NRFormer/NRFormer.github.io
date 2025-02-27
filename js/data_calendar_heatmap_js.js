@@ -67,14 +67,14 @@ function generateHeatmap(data, csvFileName) {
     console.log("Min:", minValue, "Max:", maxValue, "Days:", days, "Months:", months);
 
     var option = {
-        title: {
-            text: "Heatmap: " + csvFileName.split('/').pop(),
-            left: "center",
-            textStyle: {
-                fontSize: 16,
-                fontWeight: "bold"
-            }
-        },
+        // title: {
+        //     text: "Heatmap: " + csvFileName.split('/').pop(),
+        //     left: "center",
+        //     textStyle: {
+        //         fontSize: 16,
+        //         fontWeight: "bold"
+        //     }
+        // },
         tooltip: {
             position: 'top',
             formatter: function (params) {
