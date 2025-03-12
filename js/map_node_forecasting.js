@@ -19,7 +19,7 @@ $.get('json/japan.geojson', function (geoJson) {
     echarts.registerMap('Japan', geoJson);
 
     // 加载节点数据
-    $.get('json/map_node_forecasting/1D-data_sensor_forcasting.json', function (nodeData) {
+    $.get('json/map_sensor_forecasting/1D-data_sensor_forecasting.json', function (nodeData) {
         originalNodeData = nodeData; // 保存原始节点数据
 
         // 对每个节点数据进行处理，设置颜色和状态
