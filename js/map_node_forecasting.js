@@ -25,7 +25,7 @@ $.get('json/japan.geojson', function (geoJson) {
         // 对每个节点数据进行处理，设置颜色和状态
         const processedNodeData = nodeData.map(node => {
             const value = node.pre; // 获取节点的值
-            const isAbnormal = value.some(value => value > 1000);
+            const isAbnormal = value.some(value => value > 200);
             return {
                 ...node,
                 itemStyle: {
@@ -67,8 +67,8 @@ myChart.on('geoRoam', function () {
 });
 
 function getMapOption(nodeData, zoom, center) {
-    const greaterThanData = nodeData.filter(item => item.pre.some(value => value > 1000));
-    const lessThanOrEqualData = nodeData.filter(item => item.pre.some(value => value <= 1000));
+    const greaterThanData = nodeData.filter(item => item.pre.some(value => value > 200));
+    const lessThanOrEqualData = nodeData.filter(item => item.pre.some(value => value <= 200));
 
     return {
         title: {
